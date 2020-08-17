@@ -9,7 +9,7 @@ import (
 )
 
 // doStats is the long running goroutine that streams device statistics
-func (d *GenicamDevicePlugin) doStats(ctx context.Context, stats chan<- *device.StatsResponse, interval time.Duration) {
+func (d *GenicamDevice) doStats(ctx context.Context, stats chan<- *device.StatsResponse, interval time.Duration) {
 	defer close(stats)
 
 	// Create a timer that will fire immediately for the first detection
@@ -38,7 +38,7 @@ type deviceStats struct {
 
 // writeStatsToChannel collects device stats, partitions devices into
 // device groups, and sends the data over the provided channel.
-func (d *GenicamDevicePlugin) writeStatsToChannel(stats chan<- *device.StatsResponse, timestamp time.Time) {
+func (d *GenicamDevice) writeStatsToChannel(stats chan<- *device.StatsResponse, timestamp time.Time) {
 	statsData, err := d.collectStats()
 	if err != nil {
 		d.logger.Error("failed to get device stats", "error", err)
@@ -67,7 +67,7 @@ func (d *GenicamDevicePlugin) writeStatsToChannel(stats chan<- *device.StatsResp
 	}
 }
 
-func (d *GenicamDevicePlugin) collectStats() ([]*deviceStats, error) {
+func (d *GenicamDevice) collectStats() ([]*deviceStats, error) {
 	d.deviceLock.RLock()
 	defer d.deviceLock.RUnlock()
 

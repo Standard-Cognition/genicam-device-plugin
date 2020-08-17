@@ -1,4 +1,4 @@
-module github.com/blogle/genicam-device-plugin
+module github.com/Standard-Cognition/genicam-device-plugin
 
 go 1.12
 
