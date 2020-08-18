@@ -3,6 +3,7 @@ package device
 import (
 	"context"
 	"time"
+    "net"
 
 	"github.com/hashicorp/nomad/plugins/device"
 	"github.com/hashicorp/nomad/plugins/shared/structs"
@@ -38,7 +39,7 @@ type fingerprintedDevice struct {
     model string
     serial_nbr string
     vendor string
-    address string
+    address net.IP
     protocol string
 }
 
@@ -88,10 +89,15 @@ func (d *GenicamDevice) writeFingerprintToChannel(devices chan<- *device.Fingerp
             continue
         }
 
-        address, err := dev.Address()
+        addr, err := dev.Address()
+        address := net.ParseIP(addr)
         if err != nil {
             d.logger.Error("failed to get device address", "error", err)
             continue
+        }
+
+        if address == nil {
+            d.logger.Error("invalid IP address", "address", addr)
         }
 
         protocol, err := dev.Protocol()
@@ -121,7 +127,7 @@ func (d *GenicamDevice) writeFingerprintToChannel(devices chan<- *device.Fingerp
     deviceListByDeviceName := make(map[string][]*fingerprintedDevice)
     for _, device := range discoveredDevices {
         deviceListByDeviceName[device.model] = append(deviceListByDeviceName[device.model], device)
-        d.devices[device.serial_nbr] = device.address
+        d.devices[device.serial_nbr] = device.address.String()
     }
 
     // Build Fingerprint response with computed groups and send it over the channel
